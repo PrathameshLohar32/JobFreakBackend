@@ -13,7 +13,6 @@ import java.util.Date;
 @Data
 @Table(name = "Jobs")
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class JobEntity {
     @Id
@@ -31,43 +30,37 @@ public class JobEntity {
     private String jobDescription;
 
     @NonNull
-    private String CompanyName;
+    private String companyName;
 
     @NonNull
     private String jobLocation;
 
-    @NonNull
     private boolean isRemote;
 
     @NonNull
     private Long salary;
 
     @NonNull
+    @Enumerated(EnumType.STRING)
     private SalaryType salaryType;
 
-    @NonNull
     private boolean isPartTime;
 
-    @NonNull
     private boolean isIntership;
 
     @NonNull
+    @Enumerated(EnumType.STRING)
     private JobCategory jobCategory;
 
     @NonNull
     private Date datePosted;
 
-    @NonNull
     private boolean isActive;
 
     @NonNull
     private String dateOfJoining;
 
-    @NonNull
-    @ManyToOne
-    @JoinColumn(name = "username", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "posted_by_id", nullable = false)
     private UserEntity postedBy;
-
-
-
 }

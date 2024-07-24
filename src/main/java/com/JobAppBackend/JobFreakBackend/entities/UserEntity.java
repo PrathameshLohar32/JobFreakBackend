@@ -1,9 +1,7 @@
 package com.JobAppBackend.JobFreakBackend.entities;
 
 import com.JobAppBackend.JobFreakBackend.enums.UserType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class UserEntity {
+
+    @Id
     @NonNull
     @Column(unique = true)
     private String username;
@@ -24,14 +24,21 @@ public class UserEntity {
     @NonNull
     private String password;
 
-    @NonNull
+    @Enumerated(EnumType.STRING)
     private UserType userType;
 
     private String organization;
 
-    private List<JobEntity> appliedJobs;
-
+    @OneToMany(mappedBy = "postedBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<JobEntity> postedJobs;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_applied_jobs",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "job_id")
+    )
+    private List<JobEntity> appliedJobs;
 
     private String resumeLink;
 }
