@@ -1,9 +1,9 @@
-package com.JobAppBackend.JobFreakBackend.entities;
+package com.JobAppBackend.JobFreakBackend.dtos;
 
+import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
 import com.JobAppBackend.JobFreakBackend.enums.JobCategory;
 import com.JobAppBackend.JobFreakBackend.enums.SalaryType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -11,22 +11,17 @@ import lombok.NonNull;
 import java.util.Date;
 
 @Data
-@Table(name = "Jobs")
 @NoArgsConstructor
-@Entity
-public class JobEntity {
+public class CreateJobDTO {
     @Id
     @NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "jobId", unique = true, nullable = false)
     private Long jobId;
 
     @NonNull
-    @Column(nullable = false)
     private String jobTitle;
 
     @NonNull
-    @Column(nullable = false)
     private String jobDescription;
 
     @NonNull
@@ -40,7 +35,7 @@ public class JobEntity {
     @NonNull
     private Long salary;
 
-    @NonNull
+
     @Enumerated(EnumType.STRING)
     private SalaryType salaryType;
 
@@ -48,18 +43,17 @@ public class JobEntity {
 
     private boolean isIntership;
 
-    @NonNull
+
     @Enumerated(EnumType.STRING)
     private JobCategory jobCategory;
 
-    @NonNull
+
     private Date datePosted;
 
     private boolean isActive;
 
-    @NonNull
+
     private String dateOfJoining;
 
-    @NonNull
     private String postedBy;
 }

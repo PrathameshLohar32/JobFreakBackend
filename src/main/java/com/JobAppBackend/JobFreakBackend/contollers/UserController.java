@@ -2,10 +2,13 @@ package com.JobAppBackend.JobFreakBackend.contollers;
 
 import com.JobAppBackend.JobFreakBackend.dtos.UserDTO;
 import com.JobAppBackend.JobFreakBackend.dtos.UserProfileResponse;
+import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("JobFreak/user")
@@ -33,6 +36,11 @@ public class UserController {
     @GetMapping("/{username}")
     ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String username){
         return userService.getUserProfile(username);
+    }
+
+    @GetMapping("/{username}/appliedJobs")
+    ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
+        return userService.getAppliedJobs(username);
     }
 
 
