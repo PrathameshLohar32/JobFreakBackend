@@ -36,14 +36,5 @@ public class UserService {
         return ResponseEntity.of(Optional.of(createUserDTO));
     }
 
-    public ResponseEntity<List<JobEntity>> getAppliedJobs(String username) {
-        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
-        if (userEntityOptional.isPresent()) {
-            UserEntity userEntity = userEntityOptional.get();
-            List<JobEntity> appliedJobs = userEntity.getAppliedJobs();
-            return ResponseEntity.of(Optional.of(appliedJobs));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+
 }

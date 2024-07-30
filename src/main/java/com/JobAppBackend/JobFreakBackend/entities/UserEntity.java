@@ -29,16 +29,9 @@ public class UserEntity {
 
     private String organization;
 
-    @OneToMany(mappedBy = "postedBy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<JobEntity> postedJobs;
+    private List<Long> postedJobs;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_applied_jobs",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "job_id")
-    )
-    private List<JobEntity> appliedJobs;
+    private List<Long> appliedJobs;
 
     private String resumeLink;
 }

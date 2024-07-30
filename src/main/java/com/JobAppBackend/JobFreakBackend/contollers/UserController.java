@@ -38,10 +38,10 @@ public class UserController {
         return userService.getUserProfile(username);
     }
 
-    @GetMapping("/{username}/appliedJobs")
-    ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
-        return userService.getAppliedJobs(username);
-    }
+//    @GetMapping("/{username}/appliedJobs")
+//    ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
+//        return userService.getAppliedJobs(username);
+//    }
 
 
 

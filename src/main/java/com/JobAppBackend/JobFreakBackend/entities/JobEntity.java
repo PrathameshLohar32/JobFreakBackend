@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Table(name = "Jobs")
@@ -16,7 +17,6 @@ import java.util.Date;
 @Entity
 public class JobEntity {
     @Id
-    @NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "jobId", unique = true, nullable = false)
     private Long jobId;
@@ -35,7 +35,7 @@ public class JobEntity {
     @NonNull
     private String jobLocation;
 
-    private boolean isRemote;
+    private Boolean isRemote;
 
     @NonNull
     private Long salary;
@@ -44,9 +44,9 @@ public class JobEntity {
     @Enumerated(EnumType.STRING)
     private SalaryType salaryType;
 
-    private boolean isPartTime;
+    private Boolean isPartTime;
 
-    private boolean isIntership;
+    private Boolean isIntership;
 
     @NonNull
     @Enumerated(EnumType.STRING)
@@ -55,11 +55,15 @@ public class JobEntity {
     @NonNull
     private Date datePosted;
 
-    private boolean isActive;
+    private Boolean isActive;
 
     @NonNull
     private String dateOfJoining;
 
     @NonNull
     private String postedBy;
+
+    private Date lastDateToApply;
+
+    private List<String> appliedBy;
 }
