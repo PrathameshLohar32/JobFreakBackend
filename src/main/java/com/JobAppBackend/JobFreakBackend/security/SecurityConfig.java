@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/signin").permitAll()
                         .requestMatchers(HttpMethod.POST, "/JobFreak/user").permitAll()
                         .requestMatchers("/JobFreak/user/signin").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated());
         http.sessionManagement(
                 session ->

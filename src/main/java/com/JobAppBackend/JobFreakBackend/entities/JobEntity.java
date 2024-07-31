@@ -10,6 +10,7 @@ import lombok.NonNull;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Table(name = "Jobs")
@@ -65,5 +66,9 @@ public class JobEntity {
 
     private Date lastDateToApply;
 
-    private List<String> appliedBy;
+    @ElementCollection
+    @MapKeyColumn(name = "username")
+    @Column(name = "application_id")
+    private Map<String, Long> applications;
+
 }

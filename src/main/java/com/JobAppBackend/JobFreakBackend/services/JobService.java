@@ -1,9 +1,10 @@
 package com.JobAppBackend.JobFreakBackend.services;
 
-import com.JobAppBackend.JobFreakBackend.dtos.CreateJobDTO;
-import com.JobAppBackend.JobFreakBackend.dtos.UpdateJobRequest;
+import com.JobAppBackend.JobFreakBackend.dtos.*;
+import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.repositories.ApplicationRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -13,9 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class JobService {
@@ -24,6 +23,9 @@ public class JobService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    ApplicationRepository applicationRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -121,5 +123,73 @@ public class JobService {
         }
 
         return ResponseEntity.ok(true);
+    }
+
+    public ResponseEntity<ApplyJobResponse> ApplyJob(ApplyJobRequest applyJobRequest, Long jobId) {
+        JobEntity job = jobsRepository.getReferenceById(jobId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity user = userRepository.getReferenceById(authentication.getName());
+        if(job.getIsActive()){
+            ApplicationEntity applicationEntity = modelMapper.map(applyJobRequest, ApplicationEntity.class);
+            applicationEntity.setJobId(jobId);
+            applicationEntity.setUsername(authentication.getName());
+            applicationEntity.setAppliedDate(new Date());
+
+            ApplicationEntity saved = applicationRepository.save(applicationEntity);
+
+            ApplyJobResponse applyJobResponse = new ApplyJobResponse();
+            applyJobResponse.setJobId(saved.getJobId());
+            applyJobResponse.setApplicationId(saved.getApplicationId());
+            applyJobResponse.setUsername(saved.getUsername());
+
+            List<Long> appliedJobs = user.getAppliedJobs();
+            if(appliedJobs==null){
+                appliedJobs = new ArrayList<>();
+            }
+            appliedJobs.add(saved.getJobId());
+
+            user.setAppliedJobs(appliedJobs);
+            userRepository.save(user);
+
+            Map<String,Long> applications = job.getApplications();
+            if(applications==null){
+                applications = new HashMap<>();
+            }
+            applications.put(saved.getUsername(), saved.getApplicationId());
+
+            job.setApplications(applications);
+            jobsRepository.save(job);
+
+            return ResponseEntity.ok(applyJobResponse);
+
+        }
+
+        return ResponseEntity.badRequest().build();
+
+    }
+
+    public ResponseEntity<MyApplicationResponse> getMyApplication(Long jobId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        String username = authentication.getName();
+        Map<String,Long> applications = jobEntity.getApplications();
+        if(applications!=null && applications.containsKey(username)){
+            Long applicationId = applications.get(username);
+            ApplicationEntity applicationEntity = applicationRepository.getReferenceById(applicationId);
+            MyApplicationResponse response = modelMapper.map(applicationEntity, MyApplicationResponse.class);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    public ResponseEntity<List<ApplicationEntity>> getAllApplications(Long jobId) {
+        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Map<String,Long> applications = jobEntity.getApplications();
+        Collection<Long> values = applications.values();
+        List<Long> applicationIds = new ArrayList<>(values);
+
+        List<ApplicationEntity> applicationEntityList = applicationRepository.findAllById(applicationIds);
+
+        return ResponseEntity.ok(applicationEntityList);
     }
 }

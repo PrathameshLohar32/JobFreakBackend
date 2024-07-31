@@ -1,7 +1,7 @@
 package com.JobAppBackend.JobFreakBackend.contollers;
 
-import com.JobAppBackend.JobFreakBackend.dtos.CreateJobDTO;
-import com.JobAppBackend.JobFreakBackend.dtos.UpdateJobRequest;
+import com.JobAppBackend.JobFreakBackend.dtos.*;
+import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
 import com.JobAppBackend.JobFreakBackend.services.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +36,26 @@ public class JobsController {
         return jobService.deleteJob(jobId);
     }
 
+    @PostMapping("/{jobId}/apply")
+    public ResponseEntity<ApplyJobResponse> applyToJob(@RequestBody ApplyJobRequest applyJobRequest, @PathVariable Long jobId){
+        return jobService.ApplyJob(applyJobRequest,jobId);
+    }
+
+    @GetMapping("/{jobId}/myApplication")
+    ResponseEntity<MyApplicationResponse> getMyApplication(@PathVariable Long jobId){
+        return jobService.getMyApplication(jobId);
+    }
+
+    @GetMapping("/{jobId}/allApplications")
+    ResponseEntity<List<ApplicationEntity>> getAllApplications(@PathVariable Long jobId){
+        return jobService.getAllApplications(jobId);
+    }
+
     @GetMapping()
     public ResponseEntity<List<CreateJobDTO>> getAllJobs(){
         return jobService.getAllJobs();
     }
+
+
 
 }
