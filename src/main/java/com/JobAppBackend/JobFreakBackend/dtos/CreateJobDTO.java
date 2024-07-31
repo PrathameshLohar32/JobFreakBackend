@@ -55,6 +55,4 @@ public class CreateJobDTO {
     private String dateOfJoining;
 
     private Date lastDateToApply;
-
-    private String postedBy;
 }

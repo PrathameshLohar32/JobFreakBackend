@@ -3,11 +3,14 @@ package com.JobAppBackend.JobFreakBackend.services;
 import com.JobAppBackend.JobFreakBackend.dtos.CreateJobDTO;
 import com.JobAppBackend.JobFreakBackend.dtos.UpdateJobRequest;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
+import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,8 +29,20 @@ public class JobService {
 
 
     public ResponseEntity<CreateJobDTO> postNewJob(CreateJobDTO createJobDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntity user = userRepository.getReferenceById(username);
         JobEntity newJob = modelMapper.map(createJobDTO,JobEntity.class);
+        newJob.setPostedBy(username);
         JobEntity response = jobsRepository.save(newJob);
+
+        List<Long> postedList = user.getAppliedJobs();
+        if(postedList==null){
+            postedList = new ArrayList<>();
+        }
+        postedList.add(response.getJobId());
+        user.setPostedJobs(postedList);
+        userRepository.save(user);
         CreateJobDTO postResponse = modelMapper.map(response,CreateJobDTO.class);
         return ResponseEntity.ok(postResponse);
     }
