@@ -192,4 +192,30 @@ public class JobService {
 
         return ResponseEntity.ok(applicationEntityList);
     }
+
+    public ResponseEntity<Boolean> withDrawMyApplication(Long jobId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        String username = authentication.getName();
+        UserEntity user = userRepository.getReferenceById(username);
+        Map<String,Long> applications = jobEntity.getApplications();
+        if(applications!=null && applications.containsKey(username)){
+            Long applicationId = applications.get(username);
+            ApplicationEntity applicationEntity = applicationRepository.getReferenceById(applicationId);
+            applicationRepository.delete(applicationEntity);
+            applications.remove(username,applicationId);
+            jobEntity.setApplications(applications);
+            jobsRepository.save(jobEntity);
+
+            List<Long> appliedJobs = user.getAppliedJobs();
+            if(appliedJobs != null){
+                appliedJobs.remove(applicationId);
+                user.setAppliedJobs(appliedJobs);
+                userRepository.save(user);
+            }
+            return ResponseEntity.ok(true);
+        }
+
+        return ResponseEntity.ok(false);
+    }
 }

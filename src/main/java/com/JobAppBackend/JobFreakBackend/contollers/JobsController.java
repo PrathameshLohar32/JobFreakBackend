@@ -51,6 +51,11 @@ public class JobsController {
         return jobService.getAllApplications(jobId);
     }
 
+    @DeleteMapping("/{jobId}/myApplication")
+    ResponseEntity<Boolean> withDraw(@PathVariable Long jobId){
+        return jobService.withDrawMyApplication(jobId);
+    }
+
     @GetMapping()
     public ResponseEntity<List<CreateJobDTO>> getAllJobs(){
         return jobService.getAllJobs();
