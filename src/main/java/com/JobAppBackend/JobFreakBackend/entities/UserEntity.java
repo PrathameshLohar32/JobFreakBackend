@@ -10,7 +10,7 @@ import lombok.NonNull;
 import java.util.List;
 
 @Data
-@Table(name = "Users")
+@Table(name = "User_entity")
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

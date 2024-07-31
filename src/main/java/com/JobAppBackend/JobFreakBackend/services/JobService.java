@@ -4,6 +4,7 @@ import com.JobAppBackend.JobFreakBackend.dtos.CreateJobDTO;
 import com.JobAppBackend.JobFreakBackend.dtos.UpdateJobRequest;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
+import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import java.util.List;
 public class JobService {
     @Autowired
     JobsRepository jobsRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     ModelMapper modelMapper = new ModelMapper();
 

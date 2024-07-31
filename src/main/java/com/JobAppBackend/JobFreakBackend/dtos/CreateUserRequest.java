@@ -1,31 +1,26 @@
 package com.JobAppBackend.JobFreakBackend.dtos;
 
-import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.enums.UserType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileResponse {
-
+@AllArgsConstructor
+public class CreateUserRequest {
     @NonNull
     private String username;
 
+    @NonNull
+    private String password;
+
+    @NonNull
     private UserType userType;
 
     private String organization;
-
-    private List<Long> appliedJobs;
-
-    private List<Long> postedJobs;
 
     private String resumeLink;
 }

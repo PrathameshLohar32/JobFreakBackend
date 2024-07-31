@@ -28,9 +28,9 @@ public class UserDTO {
 
     private String organization;
 
-    private List<JobEntity> appliedJobs;
+    private List<Long> appliedJobs;
 
-    private List<JobEntity> postedJobs;
+    private List<Long> postedJobs;
 
     private String resumeLink;
 }

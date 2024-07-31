@@ -1,6 +1,8 @@
 package com.JobAppBackend.JobFreakBackend.services;
 
 
+import com.JobAppBackend.JobFreakBackend.dtos.CreateUserRequest;
+import com.JobAppBackend.JobFreakBackend.dtos.CreateUserResponse;
 import com.JobAppBackend.JobFreakBackend.dtos.UserDTO;
 import com.JobAppBackend.JobFreakBackend.dtos.UserProfileResponse;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
@@ -10,6 +12,7 @@ import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +24,10 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     JobsRepository jobsRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     ModelMapper modelMapper = new ModelMapper();
 
     public ResponseEntity<UserProfileResponse> getUserProfile(String username) {
@@ -30,11 +37,34 @@ public class UserService {
         return ResponseEntity.of(Optional.of(userProfileResponse));
     }
 
-    public ResponseEntity<UserDTO> createUser(UserDTO createUserDTO) {
-        UserEntity userEntity = modelMapper.map(createUserDTO, UserEntity.class);
+    public ResponseEntity<CreateUserResponse> createUser(CreateUserRequest createUserRequest) {
+
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(createUserRequest.getUsername());
+        userEntity.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+        userEntity.setUserType(createUserRequest.getUserType());
+        userEntity.setResumeLink(createUserRequest.getResumeLink());
+        userEntity.setOrganization(createUserRequest.getOrganization());
         userRepository.save(userEntity);
-        return ResponseEntity.of(Optional.of(createUserDTO));
+        CreateUserResponse response = modelMapper.map(userEntity, CreateUserResponse.class);
+        return ResponseEntity.of(Optional.of(response));
     }
 
 
+    public ResponseEntity<List<JobEntity>> getAppliedJobs(String username) {
+        UserEntity user = userRepository.findById(username).get();
+
+        List<Long> jobEntityList = user.getAppliedJobs();
+        List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<List<JobEntity>> getPostedJobs(String username) {
+        UserEntity user = userRepository.findById(username).get();
+
+        List<Long> jobEntityList = user.getPostedJobs();
+        List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
+        return ResponseEntity.ok(response);
+    }
 }
