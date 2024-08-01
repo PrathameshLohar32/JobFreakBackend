@@ -7,6 +7,7 @@ import com.JobAppBackend.JobFreakBackend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,7 +44,7 @@ public class UserController {
     ResponseEntity<CreateUserResponse>createUser(@RequestBody CreateUserRequest request){
         UserDetails user1 = User.withUsername(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles("USER")
+                .roles(String.valueOf(request.getUserType()))
                 .build();
         JdbcUserDetailsManager userDetailsManager=(JdbcUserDetailsManager) userDetailsService;
         userDetailsManager.createUser(user1);
@@ -55,11 +56,13 @@ public class UserController {
         return userService.getUserProfile(username);
     }
 
+    @PreAuthorize("hasRole('JOB_SEEKER')")
     @GetMapping("/{username}/appliedJobs")
     ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
         return userService.getAppliedJobs(username);
     }
 
+    @PreAuthorize("hasRole('EMPLOYER')")
     @GetMapping("/{username}/postedJobs")
     ResponseEntity<List<JobEntity>> getPostedJobs(@PathVariable String username){
         return userService.getPostedJobs(username);

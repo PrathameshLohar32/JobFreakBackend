@@ -5,6 +5,7 @@ import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
 import com.JobAppBackend.JobFreakBackend.services.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class JobsController {
     @Autowired
     JobService jobService;
 
+    @PreAuthorize("hasRole('EMPLOYER')")
     @PostMapping("/post")
     public ResponseEntity<CreateJobDTO> postNewJob(@RequestBody CreateJobDTO createJobDTO){
         return jobService.postNewJob(createJobDTO);
@@ -26,31 +28,37 @@ public class JobsController {
         return jobService.getJobWithId(jobId);
     }
 
+    @PreAuthorize("hasRole('EMPLOYER')")
     @PutMapping("/{jobId}")
     public ResponseEntity<CreateJobDTO> updateJob(@RequestBody UpdateJobRequest updateJobRequest,@PathVariable Long jobId){
         return jobService.updateJob(updateJobRequest,jobId);
     }
 
+    @PreAuthorize("hasRole('EMPLOYER')")
     @DeleteMapping("/{jobId}")
     public ResponseEntity<Boolean> deleteJob(@PathVariable Long jobId){
         return jobService.deleteJob(jobId);
     }
 
+    @PreAuthorize("hasRole('JOB_SEEKER')")
     @PostMapping("/{jobId}/apply")
     public ResponseEntity<ApplyJobResponse> applyToJob(@RequestBody ApplyJobRequest applyJobRequest, @PathVariable Long jobId){
         return jobService.ApplyJob(applyJobRequest,jobId);
     }
 
+    @PreAuthorize("hasRole('JOB_SEEKER')")
     @GetMapping("/{jobId}/myApplication")
     ResponseEntity<MyApplicationResponse> getMyApplication(@PathVariable Long jobId){
         return jobService.getMyApplication(jobId);
     }
 
+    @PreAuthorize("hasRole('EMPLOYER')")
     @GetMapping("/{jobId}/allApplications")
     ResponseEntity<List<ApplicationEntity>> getAllApplications(@PathVariable Long jobId){
         return jobService.getAllApplications(jobId);
     }
 
+    @PreAuthorize("hasRole('JOB_SEEKER')")
     @DeleteMapping("/{jobId}/myApplication")
     ResponseEntity<Boolean> withDraw(@PathVariable Long jobId){
         return jobService.withDrawMyApplication(jobId);
