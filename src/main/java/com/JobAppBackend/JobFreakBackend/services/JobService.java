@@ -4,6 +4,7 @@ import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.enums.JobCategory;
 import com.JobAppBackend.JobFreakBackend.exceptions.ApiException;
 import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.ApplicationRepository;
@@ -11,12 +12,18 @@ import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -63,15 +70,28 @@ public class JobService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<List<CreateJobDTO>> getAllJobs() {
-        List<JobEntity> allJobs = jobsRepository.findAll();
-        List<CreateJobDTO> response = new ArrayList<>();
-        for(JobEntity jobEntity : allJobs){
-            CreateJobDTO responseElement = modelMapper.map(jobEntity, CreateJobDTO.class);
-            response.add(responseElement);
-        }
+//    public ResponseEntity<List<CreateJobDTO>> getAllJobs() {
+//        List<JobEntity> allJobs = jobsRepository.findAll();
+//        List<CreateJobDTO> response = new ArrayList<>();
+//        for(JobEntity jobEntity : allJobs){
+//            CreateJobDTO responseElement = modelMapper.map(jobEntity, CreateJobDTO.class);
+//            response.add(responseElement);
+//        }
+//        return ResponseEntity.ok(response);
+//    }
+
+    public ResponseEntity<List<CreateJobDTO>> getAllJobsWithSorting(int page, int size, String sortBy, String direction, Boolean isRemote, Boolean isPartTime, Boolean isIntership, JobCategory jobCategory,Boolean isActive) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+
+        Page<JobEntity> jobPage = jobsRepository.findByFilters(
+                isRemote, isPartTime, isIntership, jobCategory, isActive, pageable);
+
+        List<CreateJobDTO> response = jobPage.getContent().stream()
+                .map(jobEntity -> modelMapper.map(jobEntity, CreateJobDTO.class))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
+
 
     public ResponseEntity<CreateJobDTO> updateJob(UpdateJobRequest updateJobRequest, Long jobId){
         Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);

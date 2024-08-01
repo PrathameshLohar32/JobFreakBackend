@@ -2,6 +2,7 @@ package com.JobAppBackend.JobFreakBackend.contollers;
 
 import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
+import com.JobAppBackend.JobFreakBackend.enums.JobCategory;
 import com.JobAppBackend.JobFreakBackend.services.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -65,10 +66,20 @@ public class JobsController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<CreateJobDTO>> getAllJobs(){
-        return jobService.getAllJobs();
-    }
+    public ResponseEntity<List<CreateJobDTO>> getAllJobsWithSortingAndFiltering(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "datePosted") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction,
+            @RequestParam(required = false) Boolean isRemote,
+            @RequestParam(required = false) Boolean isPartTime,
+            @RequestParam(required = false) Boolean isIntership,
+            @RequestParam(required = false) JobCategory jobCategory,
+            @RequestParam(required = false) Boolean isActive) {
 
+
+        return jobService.getAllJobsWithSorting(page,size,sortBy,direction,isRemote,isPartTime,isIntership,jobCategory,isActive);
+    }
 
 
 }
