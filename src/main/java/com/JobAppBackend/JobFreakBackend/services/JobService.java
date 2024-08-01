@@ -4,6 +4,8 @@ import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.ApplicationEntity;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.exceptions.ApiException;
+import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.ApplicationRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
@@ -50,7 +52,12 @@ public class JobService {
     }
 
     public ResponseEntity<CreateJobDTO> getJobWithId(Long jobId) {
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
+
         CreateJobDTO response = modelMapper.map(jobEntity,CreateJobDTO.class);
 
         return ResponseEntity.ok(response);
@@ -67,7 +74,11 @@ public class JobService {
     }
 
     public ResponseEntity<CreateJobDTO> updateJob(UpdateJobRequest updateJobRequest, Long jobId){
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
         if (updateJobRequest.getJobTitle() != null) {
             jobEntity.setJobTitle(updateJobRequest.getJobTitle());
         }
@@ -116,7 +127,11 @@ public class JobService {
 
 
     public ResponseEntity<Boolean> deleteJob(Long jobId) {
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
         jobsRepository.delete(jobEntity);
         if(jobsRepository.existsById(jobId)){
             return ResponseEntity.internalServerError().body(false);
@@ -126,9 +141,17 @@ public class JobService {
     }
 
     public ResponseEntity<ApplyJobResponse> ApplyJob(ApplyJobRequest applyJobRequest, Long jobId) {
-        JobEntity job = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity job = jobEntityOptional.get();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserEntity user = userRepository.getReferenceById(authentication.getName());
+        Map<String,Long> applications = job.getApplications();
+        if(applications.containsKey(authentication.getName())){
+            throw new ApiException("You have already applied");
+        }
         if(job.getIsActive()){
             ApplicationEntity applicationEntity = modelMapper.map(applyJobRequest, ApplicationEntity.class);
             applicationEntity.setJobId(jobId);
@@ -151,7 +174,7 @@ public class JobService {
             user.setAppliedJobs(appliedJobs);
             userRepository.save(user);
 
-            Map<String,Long> applications = job.getApplications();
+//            Map<String,Long> applications = job.getApplications();
             if(applications==null){
                 applications = new HashMap<>();
             }
@@ -170,38 +193,60 @@ public class JobService {
 
     public ResponseEntity<MyApplicationResponse> getMyApplication(Long jobId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
         String username = authentication.getName();
         Map<String,Long> applications = jobEntity.getApplications();
         if(applications!=null && applications.containsKey(username)){
             Long applicationId = applications.get(username);
-            ApplicationEntity applicationEntity = applicationRepository.getReferenceById(applicationId);
+            Optional<ApplicationEntity> applicationEntityOptional = applicationRepository.findById(applicationId);
+            if(applicationEntityOptional.isEmpty()){
+                throw new ResourceNotFoundException("application","applicationId",applicationId);
+            }
+            ApplicationEntity applicationEntity = applicationEntityOptional.get();
             MyApplicationResponse response = modelMapper.map(applicationEntity, MyApplicationResponse.class);
             return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+        throw new ResourceNotFoundException("application","JobId",jobId);
     }
 
     public ResponseEntity<List<ApplicationEntity>> getAllApplications(Long jobId) {
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
         Map<String,Long> applications = jobEntity.getApplications();
         Collection<Long> values = applications.values();
         List<Long> applicationIds = new ArrayList<>(values);
 
         List<ApplicationEntity> applicationEntityList = applicationRepository.findAllById(applicationIds);
-
+        if(applicationEntityList.isEmpty()){
+            throw new ResourceNotFoundException("Applications");
+        }
         return ResponseEntity.ok(applicationEntityList);
     }
 
     public ResponseEntity<Boolean> withDrawMyApplication(Long jobId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JobEntity jobEntity = jobsRepository.getReferenceById(jobId);
+        Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
+        if(jobEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("Job","jobId",jobId);
+        }
+        JobEntity jobEntity = jobEntityOptional.get();
         String username = authentication.getName();
         UserEntity user = userRepository.getReferenceById(username);
         Map<String,Long> applications = jobEntity.getApplications();
         if(applications!=null && applications.containsKey(username)){
             Long applicationId = applications.get(username);
-            ApplicationEntity applicationEntity = applicationRepository.getReferenceById(applicationId);
+            Optional<ApplicationEntity> applicationEntityOptional = applicationRepository.findById(applicationId);
+            if(applicationEntityOptional.isEmpty()){
+                throw new ResourceNotFoundException("application","applicationId",applicationId);
+            }
+            ApplicationEntity applicationEntity = applicationEntityOptional.get();
             applicationRepository.delete(applicationEntity);
             applications.remove(username,applicationId);
             jobEntity.setApplications(applications);

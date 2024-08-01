@@ -7,6 +7,7 @@ import com.JobAppBackend.JobFreakBackend.dtos.UserDTO;
 import com.JobAppBackend.JobFreakBackend.dtos.UserProfileResponse;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -31,7 +32,11 @@ public class UserService {
     ModelMapper modelMapper = new ModelMapper();
 
     public ResponseEntity<UserProfileResponse> getUserProfile(String username) {
-        UserEntity userEntity = userRepository.findById(username).get();
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+        UserEntity userEntity = userEntityOptional.get();
         UserProfileResponse userProfileResponse = modelMapper.map(userEntity,UserProfileResponse.class);
 
         return ResponseEntity.of(Optional.of(userProfileResponse));
@@ -53,18 +58,31 @@ public class UserService {
 
 
     public ResponseEntity<List<JobEntity>> getAppliedJobs(String username) {
-        UserEntity user = userRepository.findById(username).get();
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+        UserEntity user = userEntityOptional.get();
 
         List<Long> jobEntityList = user.getAppliedJobs();
         List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
+        if(response.isEmpty()){
+            throw new ResourceNotFoundException("Jobs");
+        }
         return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<List<JobEntity>> getPostedJobs(String username) {
-        UserEntity user = userRepository.findById(username).get();
-
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+        UserEntity user = userEntityOptional.get();
         List<Long> jobEntityList = user.getPostedJobs();
         List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
+        if(response.isEmpty()){
+            throw new ResourceNotFoundException("Jobs");
+        }
         return ResponseEntity.ok(response);
     }
 }

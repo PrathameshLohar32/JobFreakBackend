@@ -39,19 +39,6 @@ public class UserController {
     @Autowired
     UserDetailsService userDetailsService;
 
-//    @PostMapping("")
-//    ResponseEntity<?>signUpUser(){
-//        // Todo : Implement this after security configuration
-//        return null;
-//    }
-    @PostMapping("/login")
-    ResponseEntity<?>login(){
-        // Todo : Implement this after security configuration
-        return null;
-    }
-
-
-
     @PostMapping
     ResponseEntity<CreateUserResponse>createUser(@RequestBody CreateUserRequest request){
         UserDetails user1 = User.withUsername(request.getUsername())
