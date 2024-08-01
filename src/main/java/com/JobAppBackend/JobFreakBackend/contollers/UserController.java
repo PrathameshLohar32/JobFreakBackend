@@ -95,6 +95,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        SecurityContextHolder.clearContext();
+        ApiResponse response = new ApiResponse();
+        response.setSuccess(true);
+        response.setMessage("You have been logged out successfully");
+        return ResponseEntity.ok(response);
+    }
+
 
 
 
