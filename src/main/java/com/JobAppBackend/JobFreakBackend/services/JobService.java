@@ -174,7 +174,6 @@ public class JobService {
             user.setAppliedJobs(appliedJobs);
             userRepository.save(user);
 
-//            Map<String,Long> applications = job.getApplications();
             if(applications==null){
                 applications = new HashMap<>();
             }
