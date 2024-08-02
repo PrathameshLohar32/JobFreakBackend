@@ -47,8 +47,9 @@ public class UserController {
                 .roles(String.valueOf(request.getUserType()))
                 .build();
         JdbcUserDetailsManager userDetailsManager=(JdbcUserDetailsManager) userDetailsService;
+        var response = userService.createUser(request);
         userDetailsManager.createUser(user1);
-        return userService.createUser(request);
+        return response;
     }
 
     @GetMapping("/{username}")

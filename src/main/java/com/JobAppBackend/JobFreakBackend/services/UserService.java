@@ -4,6 +4,7 @@ package com.JobAppBackend.JobFreakBackend.services;
 import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.exceptions.ApiException;
 import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
@@ -41,6 +42,9 @@ public class UserService {
 
     public ResponseEntity<CreateUserResponse> createUser(CreateUserRequest createUserRequest) {
 
+       if(userRepository.existsById(createUserRequest.getUsername())){
+           throw new ApiException("Username already exist please choose different username");
+       }
 
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(createUserRequest.getUsername());
