@@ -43,8 +43,8 @@ public class JobsController {
 
     @PreAuthorize("hasRole('JOB_SEEKER')")
     @PostMapping("/{jobId}/apply")
-    public ResponseEntity<ApplyJobResponse> applyToJob(@RequestBody ApplyJobRequest applyJobRequest, @PathVariable Long jobId){
-        return jobService.ApplyJob(applyJobRequest,jobId);
+    public ResponseEntity<ApplyJobResponse> applyToJob(@RequestBody(required = false) ApplyJobRequest applyJobRequest, @PathVariable Long jobId,@RequestParam(required = false)boolean applyWithProfile){
+        return jobService.ApplyJob(applyJobRequest,jobId,applyWithProfile);
     }
 
     @PreAuthorize("hasRole('JOB_SEEKER')")

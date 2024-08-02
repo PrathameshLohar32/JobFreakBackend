@@ -160,7 +160,7 @@ public class JobService {
         return ResponseEntity.ok(true);
     }
 
-    public ResponseEntity<ApplyJobResponse> ApplyJob(ApplyJobRequest applyJobRequest, Long jobId) {
+    public ResponseEntity<ApplyJobResponse> ApplyJob(ApplyJobRequest applyJobRequest, Long jobId, boolean applyWithProfile) {
         Optional<JobEntity>jobEntityOptional = jobsRepository.findById(jobId);
         if(jobEntityOptional.isEmpty()){
             throw new ResourceNotFoundException("Job","jobId",jobId);
@@ -173,7 +173,13 @@ public class JobService {
             throw new ApiException("You have already applied");
         }
         if(job.getIsActive()){
-            ApplicationEntity applicationEntity = modelMapper.map(applyJobRequest, ApplicationEntity.class);
+            ApplicationEntity applicationEntity = null;
+            if(applyWithProfile){
+                 applicationEntity = modelMapper.map(user, ApplicationEntity.class);
+            }
+            else {
+                 applicationEntity = modelMapper.map(applyJobRequest, ApplicationEntity.class);
+            }
             applicationEntity.setJobId(jobId);
             applicationEntity.setUsername(authentication.getName());
             applicationEntity.setAppliedDate(new Date());

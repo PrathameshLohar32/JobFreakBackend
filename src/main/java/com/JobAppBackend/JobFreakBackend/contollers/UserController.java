@@ -56,6 +56,11 @@ public class UserController {
         return userService.getUserProfile(username);
     }
 
+    @PostMapping("/{username}/setup")
+    ResponseEntity<ApiResponse>setUpUserProfile(@RequestBody SetUpProfile setUpProfile,@PathVariable String username){
+        return userService.setUpUserProfile(setUpProfile,username);
+    }
+
     @PreAuthorize("hasRole('JOB_SEEKER')")
     @GetMapping("/{username}/appliedJobs")
     ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){

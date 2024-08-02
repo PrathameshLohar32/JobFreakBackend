@@ -23,9 +23,19 @@ public class UserProfileResponse {
 
     private String organization;
 
-    private List<Long> appliedJobs;
+    private String firstName;
 
-    private List<Long> postedJobs;
+    private String lastName;
 
     private String resumeLink;
+
+    private Boolean isEmailVerified;
+
+    private String passingOutYear;
+
+    private String universityName;
+
+    private String qualification;
+
+    private String branch;
 }

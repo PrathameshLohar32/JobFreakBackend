@@ -20,7 +20,12 @@ public class CreateUserRequest {
     @NonNull
     private UserType userType;
 
+    private String email;
+
+    private String firstName;
+
+    private String lastName;
+
     private String organization;
 
-    private String resumeLink;
 }

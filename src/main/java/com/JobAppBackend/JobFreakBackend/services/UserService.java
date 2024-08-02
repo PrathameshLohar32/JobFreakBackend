@@ -1,10 +1,7 @@
 package com.JobAppBackend.JobFreakBackend.services;
 
 
-import com.JobAppBackend.JobFreakBackend.dtos.CreateUserRequest;
-import com.JobAppBackend.JobFreakBackend.dtos.CreateUserResponse;
-import com.JobAppBackend.JobFreakBackend.dtos.UserDTO;
-import com.JobAppBackend.JobFreakBackend.dtos.UserProfileResponse;
+import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
 import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
@@ -49,7 +46,9 @@ public class UserService {
         userEntity.setUsername(createUserRequest.getUsername());
         userEntity.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
         userEntity.setUserType(createUserRequest.getUserType());
-        userEntity.setResumeLink(createUserRequest.getResumeLink());
+        userEntity.setFirstName(createUserRequest.getFirstName());
+        userEntity.setLastName(createUserRequest.getLastName());
+        userEntity.setEmail(createUserRequest.getEmail());
         userEntity.setOrganization(createUserRequest.getOrganization());
         userRepository.save(userEntity);
         CreateUserResponse response = modelMapper.map(userEntity, CreateUserResponse.class);
@@ -84,5 +83,49 @@ public class UserService {
             throw new ResourceNotFoundException("Jobs");
         }
         return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<ApiResponse> setUpUserProfile(SetUpProfile setUpProfile,String username) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+        UserEntity user = userEntityOptional.get();
+        if(setUpProfile.getFirstName()!=null){
+            user.setFirstName(setUpProfile.getFirstName());
+        }
+        if(setUpProfile.getLastName()!=null){
+            user.setLastName(setUpProfile.getLastName());
+        }
+        if(setUpProfile.getEmail()!=null){
+            //Todo : verify new email.
+            user.setEmail(setUpProfile.getEmail());
+        }
+        if(setUpProfile.getOrganization()!=null){
+            user.setOrganization(setUpProfile.getOrganization());
+        }
+        if(setUpProfile.getContactNumber()!=null){
+            user.setContactNumber(setUpProfile.getContactNumber());
+        }
+        if(setUpProfile.getUniversityName()!=null){
+            user.setUniversityName(setUpProfile.getUniversityName());
+        }
+        if(setUpProfile.getQualification()!=null){
+            user.setQualification(setUpProfile.getQualification());
+        }
+        if(setUpProfile.getBranch()!=null){
+            user.setBranch(setUpProfile.getBranch());
+        }
+        if(setUpProfile.getPassingOutYear()!=null){
+            user.setPassingOutYear(setUpProfile.getPassingOutYear());
+        }
+        if(setUpProfile.getResumeLink()!=null){
+            user.setResumeLink(setUpProfile.getResumeLink());
+        }
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ApiResponse("Profile set up completed",true));
+
     }
 }
