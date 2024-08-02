@@ -110,7 +110,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("{username}/verifyEmail")
+    public ResponseEntity<ApiResponse>sendVerificationLink(@PathVariable String username){
+        return userService.sendVerificationLink(username);
+    }
 
+    @GetMapping("{username}/verifyEmail")
+    public ResponseEntity<ApiResponse>verifyEmail(@RequestParam("token") String token, @PathVariable String username){
+        return userService.verifyEmail(token);
+    }
 
 
 }

@@ -4,10 +4,12 @@ package com.JobAppBackend.JobFreakBackend.services;
 import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
+import com.JobAppBackend.JobFreakBackend.entities.VerificationToken;
 import com.JobAppBackend.JobFreakBackend.exceptions.ApiException;
 import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
 import com.JobAppBackend.JobFreakBackend.repositories.UserRepository;
+import com.JobAppBackend.JobFreakBackend.repositories.VerificationTokenRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -26,6 +29,13 @@ public class UserService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    EmailSenderService emailSenderService;
+
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
+
 
     ModelMapper modelMapper = new ModelMapper();
 
@@ -102,8 +112,8 @@ public class UserService {
             user.setLastName(setUpProfile.getLastName());
         }
         if(setUpProfile.getEmail()!=null){
-            //Todo : verify new email.
             user.setEmail(setUpProfile.getEmail());
+            user.setIsEmailVerified(false);
         }
         if(setUpProfile.getOrganization()!=null){
             user.setOrganization(setUpProfile.getOrganization());
@@ -130,6 +140,46 @@ public class UserService {
         userRepository.save(user);
 
         return ResponseEntity.ok(new ApiResponse("Profile set up completed",true));
+
+    }
+
+    public ResponseEntity<ApiResponse> sendVerificationLink(String username) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+        UserEntity user = userEntityOptional.get();
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setUser(user);
+        verificationToken.setToken(token);
+        verificationToken.setExpiryTime(System.currentTimeMillis()+300000);
+        tokenRepository.save(verificationToken);
+
+        String url = String.format("http://localhost:8080/JobFreak/user/%s/verifyEmail?token=",username)+token;
+        String body = "Click on Below link to verify your email\n";
+        body = body+url;
+        emailSenderService.sendEmail(user.getEmail(),"Link for JobFreak Verfication",body);
+        return ResponseEntity.ok(new ApiResponse("Verfication Email sent", true));
+    }
+
+    public ResponseEntity<ApiResponse> verifyEmail(String token) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token);
+
+        if (verificationToken == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if(verificationToken.getExpiryTime()<System.currentTimeMillis()){
+            throw new ApiException("Verification Link Expired");
+        }
+
+        UserEntity user = verificationToken.getUser();
+        user.setIsEmailVerified(true);
+        userRepository.save(user);
+
+        tokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok(new ApiResponse("Email verified Successfully",true));
 
     }
 }
