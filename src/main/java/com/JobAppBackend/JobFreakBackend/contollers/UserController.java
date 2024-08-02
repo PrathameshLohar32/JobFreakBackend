@@ -52,6 +52,12 @@ public class UserController {
         return response;
     }
 
+    @PostMapping("/{username}/changePassword")
+    public ResponseEntity<ApiResponse> changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest changePasswordRequest) {
+        return userService.changePassword(username, changePasswordRequest);
+    }
+
+
     @GetMapping("/{username}")
     ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String username){
         return userService.getUserProfile(username);

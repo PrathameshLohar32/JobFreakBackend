@@ -13,7 +13,11 @@ import com.JobAppBackend.JobFreakBackend.repositories.VerificationTokenRepositor
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +36,9 @@ public class UserService {
 
     @Autowired
     EmailSenderService emailSenderService;
+
+    @Autowired
+    UserDetailsService userDetailsService;
 
     @Autowired
     private VerificationTokenRepository tokenRepository;
@@ -181,5 +188,30 @@ public class UserService {
 
         return ResponseEntity.ok(new ApiResponse("Email verified Successfully",true));
 
+    }
+
+    public ResponseEntity<ApiResponse> changePassword(String username, ChangePasswordRequest changePasswordRequest) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if (userEntityOptional.isEmpty()) {
+            throw new ResourceNotFoundException("user", "username", username);
+        }
+
+        UserEntity user = userEntityOptional.get();
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new ApiException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+        JdbcUserDetailsManager userDetailsManager=(JdbcUserDetailsManager) userDetailsService;
+
+        UserDetails userDetails = userDetailsManager.loadUserByUsername(username);
+        UserDetails updatedUserDetails = User.withUserDetails(userDetails)
+                .password(passwordEncoder.encode(changePasswordRequest.getNewPassword()))
+                .build();
+        userDetailsManager.updateUser(updatedUserDetails);
+
+        return ResponseEntity.ok(new ApiResponse("Password changed successfully", true));
     }
 }
