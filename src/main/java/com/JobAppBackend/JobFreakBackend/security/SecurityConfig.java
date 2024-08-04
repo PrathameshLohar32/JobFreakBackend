@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/JobFreak/user/signin").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/JobFreak/user/forgotpassword/**").permitAll()
                         .anyRequest().authenticated());
         http.sessionManagement(
                 session ->

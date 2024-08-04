@@ -21,6 +21,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ public class UserService {
     UserDetailsService userDetailsService;
 
     @Autowired
-    private VerificationTokenRepository tokenRepository;
+    VerificationTokenRepository tokenRepository;
 
 
     ModelMapper modelMapper = new ModelMapper();
@@ -71,6 +72,7 @@ public class UserService {
         userEntity.setLastName(createUserRequest.getLastName());
         userEntity.setEmail(createUserRequest.getEmail());
         userEntity.setOrganization(createUserRequest.getOrganization());
+        userEntity.setIsEmailVerified(false);
         userRepository.save(userEntity);
         CreateUserResponse response = modelMapper.map(userEntity, CreateUserResponse.class);
         return ResponseEntity.of(Optional.of(response));
@@ -195,6 +197,9 @@ public class UserService {
         if (userEntityOptional.isEmpty()) {
             throw new ResourceNotFoundException("user", "username", username);
         }
+        if(!Objects.equals(changePasswordRequest.getNewPassword(), changePasswordRequest.getConfirmNewPassword())){
+            return ResponseEntity.badRequest().body(new ApiResponse("new password and confirm password does not match",false));
+        }
 
         UserEntity user = userEntityOptional.get();
 
@@ -213,5 +218,65 @@ public class UserService {
         userDetailsManager.updateUser(updatedUserDetails);
 
         return ResponseEntity.ok(new ApiResponse("Password changed successfully", true));
+    }
+
+    public ResponseEntity<ApiResponse> sendForgotPasswordLink(ForgotPasswordRequest forgotPasswordRequest) {
+        String emailOrPassword = forgotPasswordRequest.getEmailOrUsername();
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setExpiryTime(System.currentTimeMillis()+300000);
+        if(emailOrPassword.substring(emailOrPassword.length()-4).equalsIgnoreCase(".com")){
+            UserEntity user = userRepository.findByEmail(emailOrPassword);
+            if(user==null){
+                throw new ApiException("Enter verified Email");
+            }
+            if(user.getIsEmailVerified()==null || !user.getIsEmailVerified()){
+                throw new ApiException("email is not verified");
+            }
+
+            verificationToken.setUser(user);
+            tokenRepository.save(verificationToken);
+            String url = "http://localhost:8080/JobFreak/user/forgotpassword/resetPassword?username="+user.getUsername()+"&token="+token;
+            System.out.println(url);
+        }
+        else{
+            Optional<UserEntity> userEntityOptional = userRepository.findById(emailOrPassword);
+            if(userEntityOptional.isEmpty()){
+                return ResponseEntity.badRequest().body(new ApiResponse("Invalid username",false));
+            }
+            UserEntity user = userEntityOptional.get();
+            if(!user.getIsEmailVerified()){
+                throw new ApiException("email is not verified");
+            }
+            verificationToken.setUser(user);
+            tokenRepository.save(verificationToken);
+            String url = "http://localhost:8080/JobFreak/user/forgotpassword/resetPassword?username="+user.getUsername()+"&token="+token;
+            System.out.println(url);
+        }
+        return ResponseEntity.ok(new ApiResponse("Reset password link sent on verified email",true));
+    }
+
+    public ResponseEntity<ApiResponse> resetPassword(ChangePasswordRequest request, String token, String username) {
+        if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())){
+            return ResponseEntity.badRequest().body(new ApiResponse("new password and confirm password does not match",false));
+        }
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if (userEntityOptional.isEmpty()) {
+            throw new ResourceNotFoundException("user", "username", username);
+        }
+        UserEntity user = userEntityOptional.get();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        JdbcUserDetailsManager userDetailsManager=(JdbcUserDetailsManager) userDetailsService;
+
+        UserDetails userDetails = userDetailsManager.loadUserByUsername(username);
+        UserDetails updatedUserDetails = User.withUserDetails(userDetails)
+                .password(passwordEncoder.encode(request.getNewPassword()))
+                .build();
+        userDetailsManager.updateUser(updatedUserDetails);
+
+        return ResponseEntity.ok(new ApiResponse("Password reset successfully, Kindly login with new password", true));
+
     }
 }
