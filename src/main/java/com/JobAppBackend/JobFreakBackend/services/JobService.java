@@ -36,6 +36,9 @@ public class JobService {
     @Autowired
     ApplicationRepository applicationRepository;
 
+    @Autowired
+    EmailSenderService emailSenderService;
+
     ModelMapper modelMapper = new ModelMapper();
 
 
@@ -207,7 +210,8 @@ public class JobService {
 
             job.setApplications(applications);
             jobsRepository.save(job);
-
+            String body = "Yor application received for job :"+job.getJobTitle()+"at "+job.getCompanyName()+"\nYour Application Id is :"+applicationEntity.getApplicationId();
+            emailSenderService.sendEmail(user.getEmail(),"JobFreak : Application received",body);
             return ResponseEntity.ok(applyJobResponse);
 
         }
