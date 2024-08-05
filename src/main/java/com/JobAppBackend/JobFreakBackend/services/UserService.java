@@ -238,7 +238,8 @@ public class UserService {
             verificationToken.setUser(user);
             tokenRepository.save(verificationToken);
             String url = "http://localhost:8080/JobFreak/user/forgotpassword/resetPassword?username="+user.getUsername()+"&token="+token;
-            System.out.println(url);
+            emailSenderService.sendEmail(user.getEmail(),"link to reset password for JobFreak ","Click on below link to reset password \n"+url);
+//            System.out.println(url);
         }
         else{
             Optional<UserEntity> userEntityOptional = userRepository.findById(emailOrPassword);
@@ -252,7 +253,8 @@ public class UserService {
             verificationToken.setUser(user);
             tokenRepository.save(verificationToken);
             String url = "http://localhost:8080/JobFreak/user/forgotpassword/resetPassword?username="+user.getUsername()+"&token="+token;
-            System.out.println(url);
+            emailSenderService.sendEmail(user.getEmail(),"link to reset password for JobFreak ","Click on below link to reset password \n"+url);
+//            System.out.println(url);
         }
         return ResponseEntity.ok(new ApiResponse("Reset password link sent on verified email",true));
     }
