@@ -10,4 +10,5 @@ public class ApplyJobResponse {
     private Long applicationId;
     private String username;
     private Long jobId;
+    private String applyLink;
 }

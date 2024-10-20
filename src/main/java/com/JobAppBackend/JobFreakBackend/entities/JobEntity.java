@@ -66,6 +66,8 @@ public class JobEntity {
 
     private Date lastDateToApply;
 
+    private String applyLink;
+
     @ElementCollection
     @MapKeyColumn(name = "username")
     @Column(name = "application_id")

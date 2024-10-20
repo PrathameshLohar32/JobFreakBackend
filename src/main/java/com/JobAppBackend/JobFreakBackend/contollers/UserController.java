@@ -62,9 +62,14 @@ public class UserController {
         return userService.sendForgotPasswordLink(forgotPasswordRequest);
     }
 
+    @GetMapping("/forgotpassword/resetPassword")
+    public ResponseEntity<VerifyTokenResponse> verifyResetToken(@RequestParam("token") String token, @RequestParam("username") String username) {
+        return userService.verifyResetToken(token, username);
+    }
+
     @PostMapping("/forgotpassword/resetPassword")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestBody ChangePasswordRequest request,@RequestParam("token") String token,@RequestParam("username") String username){
-        return userService.resetPassword(request,token,username);
+    public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return userService.resetPassword(request);
     }
 
     @GetMapping("/{username}")

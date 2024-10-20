@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -43,8 +44,19 @@ public class JobsController {
 
     @PreAuthorize("hasRole('JOB_SEEKER')")
     @PostMapping("/{jobId}/apply")
-    public ResponseEntity<ApplyJobResponse> applyToJob(@RequestBody(required = false) ApplyJobRequest applyJobRequest, @PathVariable Long jobId,@RequestParam(required = false)boolean applyWithProfile){
-        return jobService.ApplyJob(applyJobRequest,jobId,applyWithProfile);
+    public Object applyToJob(@RequestBody(required = false) ApplyJobRequest applyJobRequest, @PathVariable Long jobId, @RequestParam(required = false) boolean applyWithProfile){
+        var response = jobService.ApplyJob(applyJobRequest, jobId, applyWithProfile);
+        var body = response.getBody();
+        if (body != null && body.getApplyLink() != null) {
+            return handleExternalJob(body.getApplyLink());
+        }
+        return response;
+    }
+
+    public RedirectView handleExternalJob(String applyLink){
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl(applyLink);
+        return redirectView;
     }
 
     @PreAuthorize("hasRole('JOB_SEEKER')")

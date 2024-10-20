@@ -169,6 +169,11 @@ public class JobService {
             throw new ResourceNotFoundException("Job","jobId",jobId);
         }
         JobEntity job = jobEntityOptional.get();
+        if(job.getApplyLink()!=null){
+            ApplyJobResponse applyJobResponse1 = new ApplyJobResponse();
+            applyJobResponse1.setApplyLink(job.getApplyLink());
+            return ResponseEntity.ok(applyJobResponse1);
+        }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserEntity user = userRepository.getReferenceById(authentication.getName());
         Map<String,Long> applications = job.getApplications();
