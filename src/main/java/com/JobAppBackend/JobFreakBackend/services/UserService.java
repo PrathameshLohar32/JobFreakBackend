@@ -158,6 +158,9 @@ public class UserService {
             throw new ResourceNotFoundException("user","username",username);
         }
         UserEntity user = userEntityOptional.get();
+        if(user.getEmail()==null){
+            throw new ApiException("Email not found. Please set your email");
+        }
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setUser(user);
@@ -220,12 +223,12 @@ public class UserService {
         return ResponseEntity.ok(new ApiResponse("Password changed successfully", true));
     }
 
-    public ResponseEntity<ApiResponse> sendForgotPasswordLink(ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<ForgotPasswordResponse> sendForgotPasswordLink(ForgotPasswordRequest forgotPasswordRequest) {
         String emailOrUsername = forgotPasswordRequest.getEmailOrUsername();
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
-        verificationToken.setExpiryTime(System.currentTimeMillis() + 300000);
+        verificationToken.setExpiryTime(System.currentTimeMillis() + 30000000);
 
         UserEntity user;
         if (emailOrUsername.endsWith(".com")) {
@@ -236,7 +239,7 @@ public class UserService {
         } else {
             Optional<UserEntity> userEntityOptional = userRepository.findById(emailOrUsername);
             if (userEntityOptional.isEmpty()) {
-                return ResponseEntity.badRequest().body(new ApiResponse("Invalid username", false));
+                throw new ApiException("Invalid username |");
             }
             user = userEntityOptional.get();
             if (!Boolean.TRUE.equals(user.getIsEmailVerified())) {
@@ -244,13 +247,19 @@ public class UserService {
             }
         }
 
+        VerificationToken token1 = tokenRepository.findByUser(user);
+        if(token1 != null){
+
+            tokenRepository.delete(token1);
+        }
+
         verificationToken.setUser(user);
         tokenRepository.save(verificationToken);
 
-        String url = "http://localhost:8080/JobFreak/user/forgotpassword/resetPassword?username=" + user.getUsername() + "&token=" + token;
+        String url = "http://localhost:5173/forgotpassword/resetPassword?username=" + user.getUsername() + "&token=" + token;
         emailSenderService.sendEmail(user.getEmail(), "Reset password for JobFreak", "Click the link to reset your password:\n" + url);
 
-        return ResponseEntity.ok(new ApiResponse("Reset password link sent to verified email", true));
+        return ResponseEntity.ok(new ForgotPasswordResponse(user.getUsername(), token,"Reset password link is sent to verified mail"));
     }
 
     public ResponseEntity<VerifyTokenResponse> verifyResetToken(String token, String username) {

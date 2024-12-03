@@ -7,5 +7,6 @@ public enum JobCategory {
     CONTENT_WRITING,
     MECHANICAL,
     CIVIL,
-    DESIGN
+    DESIGN,
+    SOFTWARE
 }

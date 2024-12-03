@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @PostMapping("/forgotpassword")
-    public ResponseEntity<ApiResponse> sendForgotPasswordLink(@RequestBody ForgotPasswordRequest forgotPasswordRequest){
+    public ResponseEntity<ForgotPasswordResponse> sendForgotPasswordLink(@RequestBody ForgotPasswordRequest forgotPasswordRequest){
         return userService.sendForgotPasswordLink(forgotPasswordRequest);
     }
 
