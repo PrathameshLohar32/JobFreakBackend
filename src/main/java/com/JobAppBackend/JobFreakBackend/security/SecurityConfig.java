@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/JobFreak/user").permitAll()
                         .requestMatchers("/JobFreak/user/signin").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**","/JobFreak/chat/askAi").permitAll()
                         .requestMatchers("/JobFreak/user/forgotpassword/**").permitAll()
                         .anyRequest().authenticated());
         http.sessionManagement(
