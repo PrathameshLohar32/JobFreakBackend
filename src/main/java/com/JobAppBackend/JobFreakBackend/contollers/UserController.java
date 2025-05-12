@@ -2,6 +2,7 @@ package com.JobAppBackend.JobFreakBackend.contollers;
 
 import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
+import com.JobAppBackend.JobFreakBackend.enums.UserType;
 import com.JobAppBackend.JobFreakBackend.security.jwt.JwtUtils;
 import com.JobAppBackend.JobFreakBackend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,13 +83,13 @@ public class UserController {
         return userService.setUpUserProfile(setUpProfile,username);
     }
 
-    @PreAuthorize("hasRole('JOB_SEEKER')")
+//    @PreAuthorize("hasRole('JOB_SEEKER')")
     @GetMapping("/{username}/appliedJobs")
     ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
         return userService.getAppliedJobs(username);
     }
 
-    @PreAuthorize("hasRole('EMPLOYER')")
+//    @PreAuthorize("hasRole('EMPLOYER')")
     @GetMapping("/{username}/postedJobs")
     ResponseEntity<List<JobEntity>> getPostedJobs(@PathVariable String username){
         return userService.getPostedJobs(username);
@@ -138,6 +139,11 @@ public class UserController {
     @GetMapping("{username}/verifyEmail")
     public ResponseEntity<ApiResponse>verifyEmail(@RequestParam("token") String token, @PathVariable String username){
         return userService.verifyEmail(token);
+    }
+
+    @GetMapping("{username}/getRole")
+    public ResponseEntity<UserType>getRole(@PathVariable String username){
+        return userService.getRole(username);
     }
 
 

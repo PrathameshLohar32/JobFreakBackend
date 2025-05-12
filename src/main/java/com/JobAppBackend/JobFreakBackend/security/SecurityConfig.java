@@ -49,8 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/JobFreak/user").permitAll()
                         .requestMatchers("/JobFreak/user/signin").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**","/JobFreak/chat/askAi").permitAll()
-                        .requestMatchers("/JobFreak/user/forgotpassword/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**","/JobFreak/chat/askAi","/JobFreak/jobs/**").permitAll()
+                        .requestMatchers("/JobFreak/user/forgotpassword/**","/JobFreak/user/**","/**").permitAll()
                         .anyRequest().authenticated());
         http.sessionManagement(
                 session ->

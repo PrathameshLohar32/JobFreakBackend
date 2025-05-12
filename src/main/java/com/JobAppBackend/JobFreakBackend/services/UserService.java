@@ -5,6 +5,7 @@ import com.JobAppBackend.JobFreakBackend.dtos.*;
 import com.JobAppBackend.JobFreakBackend.entities.JobEntity;
 import com.JobAppBackend.JobFreakBackend.entities.UserEntity;
 import com.JobAppBackend.JobFreakBackend.entities.VerificationToken;
+import com.JobAppBackend.JobFreakBackend.enums.UserType;
 import com.JobAppBackend.JobFreakBackend.exceptions.ApiException;
 import com.JobAppBackend.JobFreakBackend.exceptions.ResourceNotFoundException;
 import com.JobAppBackend.JobFreakBackend.repositories.JobsRepository;
@@ -20,10 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -87,7 +85,10 @@ public class UserService {
         UserEntity user = userEntityOptional.get();
 
         List<Long> jobEntityList = user.getAppliedJobs();
-        List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
+        List<JobEntity> response = new ArrayList<>();
+        if(jobEntityList != null){
+            response = jobsRepository.findAllById(jobEntityList);
+        }
         if(response.isEmpty()){
             throw new ResourceNotFoundException("Jobs");
         }
@@ -298,5 +299,14 @@ public class UserService {
         userDetailsManager.updateUser(updatedUserDetails);
 
         return ResponseEntity.ok(new ApiResponse("Password reset successfully. Kindly log in with the new password", true));
+    }
+
+    public ResponseEntity<UserType> getRole(String username) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(username);
+        if(userEntityOptional.isEmpty()){
+            throw new ResourceNotFoundException("user","username",username);
+        }
+
+        return ResponseEntity.ok(userEntityOptional.get().getUserType());
     }
 }

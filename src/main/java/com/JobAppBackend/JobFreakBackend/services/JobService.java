@@ -46,6 +46,7 @@ public class JobService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UserEntity user = userRepository.getReferenceById(username);
+        createJobDTO.setDatePosted(new Date(System.currentTimeMillis()));
         JobEntity newJob = modelMapper.map(createJobDTO,JobEntity.class);
         newJob.setPostedBy(username);
         JobEntity response = jobsRepository.save(newJob);
