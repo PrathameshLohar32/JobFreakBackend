@@ -37,9 +37,8 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 
-	runtimeOnly 'com.h2database:h2'
-//	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
-
+//	runtimeOnly 'com.h2database:h2'
+	implementation("mysql:mysql-connector-java:8.0.28")
 
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

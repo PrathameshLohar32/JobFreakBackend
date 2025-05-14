@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 
 import java.util.*;
@@ -170,7 +171,7 @@ public class JobService {
             throw new ResourceNotFoundException("Job","jobId",jobId);
         }
         JobEntity job = jobEntityOptional.get();
-        if(job.getApplyLink()!=null){
+        if(!job.getApplyLink().isBlank()){
             ApplyJobResponse applyJobResponse1 = new ApplyJobResponse();
             applyJobResponse1.setApplyLink(job.getApplyLink());
             return ResponseEntity.ok(applyJobResponse1);

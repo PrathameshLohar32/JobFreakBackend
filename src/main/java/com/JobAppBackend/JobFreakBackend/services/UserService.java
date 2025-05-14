@@ -102,6 +102,9 @@ public class UserService {
         }
         UserEntity user = userEntityOptional.get();
         List<Long> jobEntityList = user.getPostedJobs();
+        if( jobEntityList==null){
+            throw new ResourceNotFoundException("Jobs");
+        }
         List<JobEntity> response = jobsRepository.findAllById(jobEntityList);
         if(response.isEmpty()){
             throw new ResourceNotFoundException("Jobs");

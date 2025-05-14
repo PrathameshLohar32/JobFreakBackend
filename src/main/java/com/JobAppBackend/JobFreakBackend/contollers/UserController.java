@@ -83,13 +83,13 @@ public class UserController {
         return userService.setUpUserProfile(setUpProfile,username);
     }
 
-//    @PreAuthorize("hasRole('JOB_SEEKER')")
+    @PreAuthorize("hasRole('JOB_SEEKER')")
     @GetMapping("/{username}/appliedJobs")
     ResponseEntity<List<JobEntity>> getAppliedJobs(@PathVariable String username){
         return userService.getAppliedJobs(username);
     }
 
-//    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER')")
     @GetMapping("/{username}/postedJobs")
     ResponseEntity<List<JobEntity>> getPostedJobs(@PathVariable String username){
         return userService.getPostedJobs(username);
