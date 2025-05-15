@@ -52,7 +52,7 @@ public class JobService {
         newJob.setPostedBy(username);
         JobEntity response = jobsRepository.save(newJob);
 
-        List<Long> postedList = user.getAppliedJobs();
+        List<Long> postedList = user.getPostedJobs();
         if(postedList==null){
             postedList = new ArrayList<>();
         }
